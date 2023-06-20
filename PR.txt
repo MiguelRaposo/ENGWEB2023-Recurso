@@ -1,0 +1,82 @@
+Exercíci o 1: Plantas (API de dados)
+
+1.1 Setup
+Removi manualmente '"intervencoes":' e a chaveta inicial e final para se tornar um jsonArray e de seguida usei o comando :
+    mongoimport -d estetica -c consultas --file dataset_operacoes_estetica.json --jsonArray
+
+1.2 Queries (warm-up)
+  
+  
+    
+1) Quantas consultas estão registadas?
+
+db.consultas.count()  
+
+5000
+
+
+
+2) Quantos clientes com mais de 80 anos foram tratados na clínica?
+
+db.consultas.count({"idade":{ $gte: 80 }})
+
+1186
+
+
+
+
+3) Qual a distribuição das consultas por sexo?
+
+db.consultas.aggregate([{$group: {_id:"$sexo", count: {$sum: 1}}}])
+
+[
+  { _id: 'Outro', count: 1706 },
+  { _id: 'Feminino', count: 1652 },
+  { _id: 'Masculino', count: 1642 }
+]
+
+
+
+4) Qual a distribuição por tipo de intervenção? (por exemplo: quantas massagens relaxantes, quantas depilações a cera, ...)
+
+db.consultas.aggregate([ { $unwind: "$operacoes" }, { $group: { _id: "$operacoes.nome", count: { $sum: 1 } } }])
+
+[
+  { _id: 'Massagem relaxante', count: 1250 },
+  { _id: 'Tratamento facial com máscara', count: 1230 },
+  { _id: 'Depilação a laser', count: 1224 },
+  { _id: 'Limpeza de pele', count: 1308 },
+  { _id: 'Peeling químico', count: 1245 },
+  { _id: 'Tratamento de celulite', count: 1216 },
+  { _id: 'Depilação a cera', count: 1303 },
+  { _id: 'Tratamento de manchas na pele', count: 1271 },
+  { _id: 'Maquilhagem profissional', count: 1218 },
+  { _id: 'Microdermoabrasão', count: 1195 },
+  { _id: 'Toxina botulínica (Botox)', count: 1229 },
+  { _id: 'Preenchimento facial', count: 1226 },
+  { _id: 'Tratamento de estrias', count: 1202 },
+  { _id: 'Lifting facial', count: 1196 },
+  { _id: 'Tratamento de gordura localizada', count: 1228 },
+  { _id: 'Manicure e pedicure', count: 1245 },
+  { _id: 'Tratamento de acne', count: 1276 },
+  { _id: 'Tratamento de rugas', count: 1227 }
+]
+
+
+
+
+5) Qual a distribuição do número de consultas por ano?
+
+db.consultas.aggregate([ { $group: { _id: { $year: { $toDate: "$data" } }, count: { $sum: 1 } } }, { $sort: { _id: 1 } }])
+
+[
+  { _id: 2015, count: 563 },
+  { _id: 2016, count: 578 },
+  { _id: 2017, count: 626 },
+  { _id: 2018, count: 562 },
+  { _id: 2019, count: 590 },
+  { _id: 2020, count: 590 },
+  { _id: 2021, count: 621 },
+  { _id: 2022, count: 578 },
+  { _id: 2023, count: 292 }
+]  
